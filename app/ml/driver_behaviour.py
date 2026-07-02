@@ -9,11 +9,11 @@ MODEL_DIR = Path(__file__).parent.parent.parent / "models"
 _kmeans = joblib.load(MODEL_DIR / "kmeans_driver_behavior_model.joblib")
 _scaler = joblib.load(MODEL_DIR / "standard_scaler_driver_behavior.joblib")
 
-# Correct cluster mapping (based on your output)
+# Correct cluster mapping (based on train_kmeans_driver.py output)
 CLUSTER_MAP = {
     1: "Economical",
-    2: "Moderate",
-    0: "Harsh"
+    0: "Moderate",
+    2: "Harsh"
 }
 
 # ONLY these features (IMPORTANT)

@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
 from app.ml.driver_behaviour import predict_from_raw_window
+from app.ml.health_classifier import classify_vehicle_health
 
 app = FastAPI(title="ECU Guardian API", version="1.0.0")
 
@@ -18,6 +19,18 @@ class WindowRequest(BaseModel):
     rpm_values: List[float]
     speed_values: List[float]
     throttle_values: List[float]
+#Random
+
+# Random Forest snapshot health classification request model
+class HealthSnapshotRequest(BaseModel):
+    rpm: float
+    throttle_pos: float
+    map_kpa: float
+    maf: float
+    coolant_temp: float
+    intake_air_temp: float
+    ambient_temp: float
+    pedal_d: float
 
 @app.get("/health")
 def health():
@@ -37,5 +50,14 @@ def predict(body: WindowRequest):
 
         return result
 
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/health/predict")
+def predict_health(body: HealthSnapshotRequest):
+    try:
+        result = classify_vehicle_health(body.dict())
+        return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
