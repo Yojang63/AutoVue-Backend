@@ -8,3 +8,4 @@ python-multipart>=0.0.9
 pydantic>=2.7
 openpyxl>=3.1
 websockets>=13.0
+tensorflow>=2.16
