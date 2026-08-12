@@ -36,6 +36,8 @@ from app.simulator.api.routes import router as simulator_router
 from app.simulator.api.websocket import telemetry_manager, log_manager
 from app.simulator.services.simulator import simulator
 
+from app.ml.anomaly_lstm import classify_anomaly_window, FEATURES as LSTM_FEATURES, WINDOW as LSTM_WINDOW
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -69,7 +71,9 @@ class HealthSnapshotRequest(BaseModel):
     ambient_temp: float
     pedal_d: float
 
-
+class AnomalyWindowRequest(BaseModel):
+    rows: List[dict]   # exactly WINDOW rows, each a dict of the LSTM feature names -> value
+  
 @app.get("/health")
 def health():
     return {"status": "ok"}
@@ -93,7 +97,16 @@ def predict_health(body: HealthSnapshotRequest):
         return classify_vehicle_health(body.dict())
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+      
+@app.post("/api/anomaly/predict")
 
+def predict_anomaly(body: AnomalyWindowRequest):
+    try:
+        return classify_anomaly_window(body.rows)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # ---------------- Simulator (dataset playback + streaming) ----------------
 
